@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+declare -r INPUT_FILE="${1:?Input file is required}"
+cat history.log \
+| sed -e 's/* |* /\n/' \
+| sed -e 's#^./+##' \
+| cut -d ' ' -f1 \
+| sort | uniq -c \
+| head -n10
