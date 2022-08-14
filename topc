@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 
 declare -r INPUT_FILE="${1:?Input file is required}"
-cat history.log \
-| sed -e 's/* |* /\n/' \
-| sed -e 's#^./+##' \
+
+sed -E -e 's/ +\| +/\n/g' \
+ -e 's/^ +//' \
+ -e 's/^(sudo|nohup) +//' \
+"${INPUT_FILE}" \
 | cut -d ' ' -f1 \
-| sort | uniq -c \
-| head -n10
+| sed -E 's#.*/##' \
+| grep -E -v '^(ls|ll|echo|cd|cat|vim)$' \
+| awk '{total++; cmds[$1]++;} END{for (cmd in cmds) { printf "%d %f %s\n", cmds[cmd], cmds[cmd]/total*100, cmd; }}' \
+| sort -t' ' -k1,1nr -k3,3 \
+| awk '{printf "%4d %6.2f%%  %s\n", $1, $2,$3;}'\
+| head -n10 
+
+
+
